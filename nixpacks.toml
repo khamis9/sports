@@ -2,23 +2,25 @@
 nixPkgs = ["php83", "php83Packages.composer", "nodejs_22"]
 
 [phases.install]
-cmds = ["composer install --optimize-autoloader --no-scripts --no-interaction"]
+cmds = [
+  "composer install --optimize-autoloader --no-scripts --no-interaction",
+  "cd frontend && npm ci && cd .."
+]
 
 [phases.build]
 cmds = [
-  "cd frontend && npm ci && npm run build && cd ..",
-  "echo 'Checking frontend build directory:'",
-  "ls -la frontend/build/ || echo 'Build directory not found!'",
-  "echo 'Current public directory:'",
+  "echo '=== Building React Frontend ==='",
+  "cd frontend && npm run build && cd ..",
+  "echo '=== Build completed, checking output ==='",
+  "ls -la frontend/build/",
+  "echo '=== Copying to public directory ==='",
+  "cp -r frontend/build/* public/",
+  "echo '=== Verifying public directory ==='",
   "ls -la public/",
-  "rm -rf public/index.html public/static public/manifest.json public/favicon.ico public/logo*.png public/robots.txt public/asset-manifest.json",
-  "cp -r frontend/build/* public/ || echo 'Copy failed!'",
-  "echo 'Updated public directory:'",
-  "ls -la public/",
-  "test -f public/index.html && echo 'index.html exists!' || echo 'ERROR: index.html NOT found!'",
+  "cat public/index.html | head -n 5",
+  "echo '=== Caching Laravel config ==='",
   "php artisan config:cache",
-  "php artisan route:cache",
-  "php artisan view:cache"
+  "php artisan route:cache"
 ]
 
 [start]
