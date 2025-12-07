@@ -1,11 +1,18 @@
 [phases.setup]
-nixPkgs = ["php83", "php83Packages.composer"]
+nixPkgs = ["php83", "php83Packages.composer", "nodejs_22"]
 
 [phases.install]
 cmds = ["composer install --optimize-autoloader --no-scripts --no-interaction"]
 
 [phases.build]
-cmds = ["npm install", "npm run build", "php artisan config:cache", "php artisan route:cache", "php artisan view:cache"]
+cmds = [
+  "cd frontend && npm install && npm run build && cd ..",
+  "mkdir -p public",
+  "cp -r frontend/build/* public/",
+  "php artisan config:cache",
+  "php artisan route:cache",
+  "php artisan view:cache"
+]
 
 [start]
 cmd = "php artisan serve --host=0.0.0.0 --port=$PORT"
