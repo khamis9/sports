@@ -3,22 +3,26 @@ nixPkgs = ["php83", "php83Packages.composer", "nodejs_22"]
 
 [phases.install]
 cmds = [
-  "composer install --optimize-autoloader --no-scripts --no-interaction",
-  "cd frontend && npm ci && cd .."
+  "composer install --optimize-autoloader --no-dev --no-interaction"
 ]
 
 [phases.build]
 cmds = [
+  "echo '=== Installing frontend dependencies ==='",
+  "(cd frontend && npm install --production=false)",
   "echo '=== Building React Frontend ==='",
-  "cd frontend && npm run build && cd ..",
-  "echo '=== Build completed, checking output ==='",
-  "ls -la frontend/build/",
-  "echo '=== Copying to public directory ==='",
-  "cp -r frontend/build/* public/",
-  "echo '=== Verifying public directory ==='",
-  "ls -la public/",
-  "cat public/index.html | head -n 5",
-  "echo '=== Caching Laravel config ==='",
+  "(cd frontend && CI=false npm run build)",
+  "echo '=== Checking build output ==='",
+  "ls -lah frontend/build/ || (echo 'BUILD FAILED: No build directory' && exit 1)",
+  "test -f frontend/build/index.html || (echo 'BUILD FAILED: No index.html' && exit 1)",
+  "echo '=== Copying frontend build to public ==='",
+  "cp -rv frontend/build/* public/",
+  "echo '=== Final public directory contents ==='",
+  "ls -lah public/",
+  "test -f public/index.html || (echo 'COPY FAILED: No index.html in public' && exit 1)",
+  "echo '=== SUCCESS: index.html is in public directory ==='",
+  "php artisan config:clear",
+  "php artisan route:clear",
   "php artisan config:cache",
   "php artisan route:cache"
 ]
