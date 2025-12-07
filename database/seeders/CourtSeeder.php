@@ -37,7 +37,10 @@ class CourtSeeder extends Seeder
         ];
 
         foreach ($courts as $court) {
-            Court::create($court);
+            Court::updateOrCreate(
+                ['name' => $court['name']],
+                $court
+            );
         }
     }
 }

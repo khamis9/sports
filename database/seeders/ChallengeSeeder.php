@@ -42,7 +42,10 @@ class ChallengeSeeder extends Seeder
         ];
 
         foreach ($challenges as $challenge) {
-            Challenge::create($challenge);
+            Challenge::updateOrCreate(
+                ['title' => $challenge['title']],
+                $challenge
+            );
         }
     }
 }
