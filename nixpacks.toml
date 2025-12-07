@@ -7,8 +7,9 @@ cmds = ["composer install --optimize-autoloader --no-scripts --no-interaction"]
 [phases.build]
 cmds = [
   "cd frontend && npm install && npm run build && cd ..",
-  "mkdir -p public",
+  "rm -rf public/index.html public/static public/manifest.json public/favicon.ico public/logo*.png public/robots.txt",
   "cp -r frontend/build/* public/",
+  "ls -la public/",
   "php artisan config:cache",
   "php artisan route:cache",
   "php artisan view:cache"
